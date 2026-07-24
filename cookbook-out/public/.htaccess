@@ -1,0 +1,15 @@
+# ── Filipino Cookbook API — Apache rewrite rules ───────────────────────────────
+# Routes every request that isn't an actual file/directory through index.php.
+# Required for Apache/XAMPP; the PHP built-in server doesn't need this file.
+
+Options -Indexes
+
+RewriteEngine On
+
+# Allow direct access to real files (CSS, JS, images, SQL, etc.)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Everything else → Slim
+RewriteRule ^ index.php [QSA,L]

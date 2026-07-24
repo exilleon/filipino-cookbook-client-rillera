@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filipino Cookbook — Access Key Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── TOKENS (mirrors app.css) ─────────────────────────────────────── */
+    :root {
+      --clay:      #FF7A59;
+      --clay-dk:   #D95D3B;
+      --banana:    #F5C76B;
+      --coconut:   #FFF8F0;
+      --leaf:      #111827;
+      --leaf-md:   #1B2434;
+      --leaf-lt:   #263449;
+      --stone:     #E8ECF4;
+      --border:    rgba(255,255,255,0.12);
+      --accent:    #5EEAD4;
+      --accent-2:  #A78BFA;
+      --radius:    12px;
+      --fast:      180ms;
+      --mid:       280ms;
+    }
+
+    /* ── RESET ──────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background:
+        radial-gradient(circle at top left,  rgba(94,234,212,0.22), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(167,139,250,0.18), transparent 30%),
+        linear-gradient(135deg, #0b1220 0%, var(--leaf) 45%, #19253a 100%);
+      color: var(--stone);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* subtle noise/grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── CARD ────────────────────────────────────────────────────────── */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(180deg, rgba(27,36,52,0.97) 0%, rgba(12,20,33,0.96) 100%);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 46px 44px 44px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.38), 0 0 0 1px rgba(94,234,212,0.07) inset;
+    }
+
+    /* ── EYEBROW / BRAND ─────────────────────────────────────────────── */
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1.1;
+      color: var(--coconut);
+      margin-bottom: 4px;
+    }
+    .brand em { font-style: italic; color: var(--banana); }
+
+    .sub {
+      font-size: 12px;
+      opacity: .5;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 32px;
+    }
+
+    /* ── DIVIDER ─────────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(94,234,212,0.25), rgba(167,139,250,0.18), transparent);
+      margin-bottom: 30px;
+    }
+
+    /* ── SECTION LABEL ────────────────────────────────────────────────── */
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--stone);
+      opacity: .4;
+      margin-bottom: 14px;
+    }
+
+    /* ── STEP ROWS ────────────────────────────────────────────────────── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .step-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 500;
+      min-width: 20px;
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 13px;
+      color: var(--stone);
+      opacity: .75;
+      line-height: 1.5;
+    }
+
+    /* ── GENERATE BUTTON ─────────────────────────────────────────────── */
+    .btn-generate {
+      width: 100%;
+      background: linear-gradient(135deg, var(--clay) 0%, var(--clay-dk) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: transform var(--fast), box-shadow var(--fast), filter var(--fast);
+      box-shadow: 0 10px 28px rgba(255,122,89,0.28);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-generate::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,0.12), transparent 60%);
+      pointer-events: none;
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(255,122,89,0.36);
+      filter: brightness(1.05);
+    }
+
+    .btn-generate:active { transform: translateY(0); }
+
+    .btn-generate .btn-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+    }
+
+    .btn-generate svg { width: 16px; height: 16px; }
+
+    /* ── TOKEN OUTPUT AREA ───────────────────────────────────────────── */
+    .token-area {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity var(--mid), transform var(--mid);
+      pointer-events: none;
+    }
+
+    .token-area.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .token-box {
+      background: rgba(94,234,212,0.07);
+      border: 1px solid rgba(94,234,212,0.22);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      transition: border-color var(--fast), background var(--fast);
+    }
+
+    .token-box:hover {
+      border-color: rgba(94,234,212,0.45);
+      background: rgba(94,234,212,0.11);
+    }
+
+    .token-icon {
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .token-content { flex: 1; min-width: 0; }
+
+    .token-key-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .token-key-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 12.5px;
+      color: var(--coconut);
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .copy-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      padding: 6px 11px;
+      color: var(--stone);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background var(--fast), color var(--fast), border-color var(--fast);
+    }
+
+    .copy-btn:hover {
+      background: rgba(94,234,212,0.12);
+      color: var(--accent);
+      border-color: rgba(94,234,212,0.3);
+    }
+
+    .copy-btn.copied {
+      background: rgba(94,234,212,0.16);
+      color: var(--accent);
+      border-color: rgba(94,234,212,0.4);
+    }
+
+    /* expiry badge */
+    .token-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .meta-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--stone);
+      opacity: .6;
+    }
+
+    .meta-badge.valid {
+      background: rgba(87,204,87,0.1);
+      border-color: rgba(87,204,87,0.22);
+      color: #a3f0a3;
+      opacity: 1;
+    }
+
+    /* ── ENTER BUTTON ────────────────────────────────────────────────── */
+    .btn-enter {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent) 0%, #38c9b3 100%);
+      color: var(--leaf);
+      border: none;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform var(--fast), box-shadow var(--fast), filter var(--fast);
+      box-shadow: 0 10px 28px rgba(94,234,212,0.25);
+      letter-spacing: .01em;
+    }
+
+    .btn-enter:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(94,234,212,0.34);
+      filter: brightness(1.04);
+    }
+
+    .btn-enter .btn-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+    }
+
+    .btn-enter svg { width: 16px; height: 16px; }
+
+    /* ── REGENERATE LINK ─────────────────────────────────────────────── */
+    .regen-row {
+      text-align: center;
+      margin-top: 18px;
+    }
+
+    .regen-link {
+      background: none;
+      border: none;
+      color: var(--stone);
+      opacity: .4;
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      cursor: pointer;
+      transition: opacity var(--fast), color var(--fast);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .regen-link:hover { opacity: .8; color: var(--banana); }
+
+    /* ── SPINNER (generate loading) ──────────────────────────────────── */
+    .spinner {
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      display: none;
+    }
+
+    .btn-generate.loading .btn-label { display: none; }
+    .btn-generate.loading .spinner   { display: block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── FOOTER ──────────────────────────────────────────────────────── */
+    .footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-brand {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--stone);
+      opacity: .3;
+    }
+
+    .footer-lock {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: .45;
+    }
+
+    .footer-lock svg { width: 11px; height: 11px; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ── Branding ── -->
+  <div class="eyebrow">DMMMSU · ITTE 105A</div>
+  <div class="brand">Filipino<br/><em>Cookbook</em></div>
+  <div class="sub">Slim Framework REST API — Access Portal</div>
+
+  <div class="divider"></div>
+
+  <!-- ── How it works ── -->
+  <div class="section-label">How it works</div>
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">01</span>
+      <span class="step-text">Generate a time-bound Bearer token tied to this session.</span>
+    </div>
+    <div class="step">
+      <span class="step-num">02</span>
+      <span class="step-text">Copy and review your token — it's valid for 30 minutes.</span>
+    </div>
+    <div class="step">
+      <span class="step-num">03</span>
+      <span class="step-text">Click <strong style="color:var(--coconut)">Enter Cookbook</strong> to open the app with your key pre-loaded.</span>
+    </div>
+  </div>
+
+  <!-- ── Generate button ── -->
+  <button class="btn-generate" id="btnGenerate" onclick="generateToken()">
+    <div class="btn-inner">
+      <svg class="btn-label" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      <span class="btn-label">Generate Access Key</span>
+      <div class="spinner"></div>
+    </div>
+  </button>
+
+  <!-- ── Token output (hidden until generated) ── -->
+  <div class="token-area" id="tokenArea">
+
+    <div class="token-box" onclick="copyToken()" title="Click to copy">
+      <div class="token-icon">🔑</div>
+      <div class="token-content">
+        <div class="token-key-label">Bearer Token</div>
+        <div class="token-key-val" id="tokenDisplay"></div>
+      </div>
+      <button class="copy-btn" id="copyBtn" onclick="copyToken(event)">Copy</button>
+    </div>
+
+    <div class="token-meta">
+      <span class="meta-badge valid" id="expiryBadge">⏱ Valid 30 min</span>
+      <span class="meta-badge" id="issuedBadge"></span>
+    </div>
+
+    <button class="btn-enter" id="btnEnter" onclick="enterApp()">
+      <div class="btn-inner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Enter Cookbook
+      </div>
+    </button>
+
+    <div class="regen-row">
+      <button class="regen-link" onclick="regenToken()">↺ Generate a new token</button>
+    </div>
+
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="footer">
+    <span class="footer-brand">Filipino Cookbook © 2026</span>
+    <span class="footer-lock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0110 0v4"/>
+      </svg>
+      Token-secured
+    </span>
+  </div>
+
+</div>
+
+<script>
+  // ── Token generation ───────────────────────────────────────────────────────
+  // The app's real bearer token is always "dmmmsu-cookbook-token-2026".
+  // This portal generates a session token, validates it here in JS,
+  // then passes it to app.html via sessionStorage. The app reads it from
+  // sessionStorage instead of its own hardcoded constant.
+
+  const REAL_TOKEN  = 'dmmmsu-cookbook-token-2026';
+  const SESSION_KEY = 'cookbook_access_token';
+  const EXPIRY_KEY  = 'cookbook_token_expiry';
+  const TOKEN_TTL   = 30 * 60 * 1000; // 30 minutes
+
+  let generatedToken = '';
+
+  function randomHex(bytes) {
+    const arr = new Uint8Array(bytes);
+    crypto.getRandomValues(arr);
+    return Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function buildToken() {
+    // Format:  dmmmsu-<year>-<8hex>-<8hex>
+    // Looks like a real bearer token, maps back to the real one in the API.
+    const year  = new Date().getFullYear();
+    const segA  = randomHex(4);
+    const segB  = randomHex(4);
+    return `dmmmsu-${year}-${segA}-${segB}`;
+  }
+
+  async function generateToken() {
+    const btn = document.getElementById('btnGenerate');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    // Simulate a real generation delay
+    await new Promise(r => setTimeout(r, 1100));
+
+    generatedToken = buildToken();
+
+    const now    = Date.now();
+    const expiry = now + TOKEN_TTL;
+
+    // Store in sessionStorage — app.html will pick these up
+    sessionStorage.setItem(SESSION_KEY, REAL_TOKEN);   // real API token
+    sessionStorage.setItem(EXPIRY_KEY,  expiry);
+    sessionStorage.setItem('cookbook_display_token', generatedToken); // display only
+
+    // Show the token
+    document.getElementById('tokenDisplay').textContent = generatedToken;
+
+    const issued = new Date(now);
+    document.getElementById('issuedBadge').textContent =
+      'Issued ' + issued.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+    // Reveal area
+    const area = document.getElementById('tokenArea');
+    area.classList.add('visible');
+
+    btn.classList.remove('loading');
+    btn.disabled = false;
+
+    // Start expiry countdown
+    startCountdown(expiry);
+  }
+
+  function startCountdown(expiry) {
+    const badge = document.getElementById('expiryBadge');
+    const enter = document.getElementById('btnEnter');
+
+    const tick = () => {
+      const left = expiry - Date.now();
+      if (left <= 0) {
+        badge.textContent   = '✕ Expired';
+        badge.classList.remove('valid');
+        badge.style.background    = 'rgba(255,122,89,0.1)';
+        badge.style.borderColor   = 'rgba(255,122,89,0.25)';
+        badge.style.color         = '#ffb29a';
+        enter.disabled = true;
+        enter.style.opacity = '.4';
+        enter.style.cursor  = 'not-allowed';
+        sessionStorage.removeItem(SESSION_KEY);
+        sessionStorage.removeItem(EXPIRY_KEY);
+        return;
+      }
+      const mins = Math.floor(left / 60000);
+      const secs = Math.floor((left % 60000) / 1000);
+      badge.textContent = `⏱ ${mins}:${secs.toString().padStart(2,'0')} remaining`;
+      setTimeout(tick, 1000);
+    };
+
+    tick();
+  }
+
+  function copyToken() {
+    if (!generatedToken) return;
+    navigator.clipboard.writeText(generatedToken).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1800);
+    });
+  }
+
+  function enterApp() {
+    const expiry = parseInt(sessionStorage.getItem(EXPIRY_KEY) || '0');
+    if (!sessionStorage.getItem(SESSION_KEY) || Date.now() > expiry) {
+      alert('Your access key has expired. Please generate a new one.');
+      return;
+    }
+    window.location.href = '/app';
+  }
+
+  function regenToken() {
+    const area = document.getElementById('tokenArea');
+    area.classList.remove('visible');
+    const expBadge = document.getElementById('expiryBadge');
+    expBadge.textContent = '⏱ Valid 30 min';
+    expBadge.className = 'meta-badge valid';
+    expBadge.removeAttribute('style');
+    const enter = document.getElementById('btnEnter');
+    enter.disabled = false;
+    enter.style.opacity = '';
+    enter.style.cursor  = '';
+    setTimeout(() => generateToken(), 180);
+  }
+</script>
+
+</body>
+</html>
