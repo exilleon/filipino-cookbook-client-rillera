@@ -188,6 +188,7 @@ $corsMiddleware = function (Request $request, RequestHandler $handler): Response
 // ── RATE LIMITER ──────────────────────────────────────────────────────────────
 //  Applied to /api/* only. Returns 429 when the IP hits the limit.
 //  Adds X-RateLimit-Limit / X-RateLimit-Remaining to every API response.
+//  Added by (editor: Stradlin)
 // ─────────────────────────────────────────────────────────────────────────────
 $rateLimitMiddleware = function (Request $request, RequestHandler $handler): Response {
     $params = $request->getServerParams();
@@ -253,7 +254,7 @@ $app->add($corsMiddleware);
 
 /** Access-key portal */
 $app->get('/', function (Request $request, Response $response) {
-    $file = __DIR__ . '/UI/index.html';
+    $file = __DIR__ . '/index.html';
     if (!file_exists($file)) {
         return jsonResponse($response, ['error' => 'UI not found'], 404);
     }
@@ -263,7 +264,7 @@ $app->get('/', function (Request $request, Response $response) {
 
 /** Main cookbook application */
 $app->get('/app', function (Request $request, Response $response) {
-    $file = __DIR__ . '/UI/app.html';
+    $file = __DIR__ . '/app.html';
     if (!file_exists($file)) {
         return jsonResponse($response, ['error' => 'App not found'], 404);
     }

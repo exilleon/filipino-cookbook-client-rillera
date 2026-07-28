@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filipino Cookbook — Lutuin Mo Na</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <!-- ── SIDEBAR ── -->
+      <aside class="sidebar">
+        <div class="logo-wrap">
+          <div class="logo-eyebrow">DMMMSU · ITTE 105A</div>
+          <div class="logo-title">Filipino<br /><em>Cookbook</em></div>
+          <div class="logo-sub">Slim Framework REST API</div>
+        </div>
+
+        <div class="token-strip" id="tokenStrip">
+          <div class="token-label">Bearer Token</div>
+          <div class="token-val" id="sidebarToken">Loading…</div>
+        </div>
+
+        <nav>
+          <div class="nav-section">Browse</div>
+          <button
+            class="nav-btn active"
+            onclick="showView('welcome')"
+            id="nav-welcome"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Overview
+          </button>
+          <button class="nav-btn" onclick="showView('foods')" id="nav-foods">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
+              />
+              <path d="M8 12h8M12 8v8" />
+            </svg>
+            All Foods
+          </button>
+          <button
+            class="nav-btn"
+            onclick="showView('categories')"
+            id="nav-categories"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+            </svg>
+            Categories
+          </button>
+          <button
+            class="nav-btn"
+            onclick="showView('ingredients')"
+            id="nav-ingredients"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+              <path d="M12 8v4l3 3" />
+            </svg>
+            Ingredients
+          </button>
+
+          <div class="nav-section manage-section">Manage</div>
+          <button class="nav-btn" onclick="showView('add')" id="nav-add">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            Add Food
+          </button>
+        </nav>
+
+        <button
+          class="sign-out-btn"
+          onclick="signOut()"
+          title="Revoke token and return to access portal"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign Out
+        </button>
+
+        <div class="api-status" id="apiStatus">
+          <div class="dot red" id="statusDot"></div>
+          <span id="statusText">Connecting…</span>
+        </div>
+      </aside>
+
+      <!-- ── MAIN ── -->
+      <div class="main">
+        <div class="topbar">
+          <h2 id="pageTitle">Overview</h2>
+          <div class="search-wrap hidden" id="searchWrap">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search foods…"
+              oninput="handleSearch(this.value)"
+            />
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="error-banner" id="errorBanner"></div>
+
+          <!-- WELCOME VIEW -->
+          <div class="welcome" id="view-welcome">
+            <h1>Lutuin<br /><em>Mo Na.</em></h1>
+            <p>
+              A token-secured REST API serving 15 classic Filipino dishes —
+              built with Slim Framework, MySQL, and running on XAMPP localhost.
+              Click any section in the sidebar to start exploring.
+            </p>
+            <ul class="endpoint-list">
+              <li class="endpoint-item">
+                <span class="ep-method get">GET</span
+                ><span class="ep-path">/</span
+                ><span class="ep-desc">Welcome message</span>
+              </li>
+              <li class="endpoint-item">
+                <span class="ep-method get">GET</span
+                ><span class="ep-path">/api/foods</span
+                ><span class="ep-desc">All foods + ingredients</span>
+              </li>
+              <li class="endpoint-item">
+                <span class="ep-method get">GET</span
+                ><span class="ep-path">/api/foods/{id}</span
+                ><span class="ep-desc">Food by ID</span>
+              </li>
+              <li class="endpoint-item">
+                <span class="ep-method get">GET</span
+                ><span class="ep-path">/api/foods/search/{name}</span
+                ><span class="ep-desc">Search by name</span>
+              </li>
+              <li class="endpoint-item">
+                <span class="ep-method get">GET</span
+                ><span class="ep-path">/api/categories</span
+                ><span class="ep-desc">All categories</span>
+              </li>
+              <li class="endpoint-item">
+                <span class="ep-method get">GET</span
+                ><span class="ep-path">/api/ingredients</span
+                ><span class="ep-desc">All ingredients</span>
+              </li>
+              <li class="endpoint-item">
+                <span class="ep-method post">POST</span
+                ><span class="ep-path">/api/foods</span
+                ><span class="ep-desc">Add new food</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- FOODS VIEW -->
+          <div id="view-foods" class="view-panel">
+            <div id="foodsContent">
+              <div class="loader">
+                <div class="spinner"></div>
+                Fetching dishes…
+              </div>
+            </div>
+          </div>
+
+          <!-- CATEGORIES VIEW -->
+          <div id="view-categories" class="view-panel">
+            <div id="categoriesContent">
+              <div class="loader">
+                <div class="spinner"></div>
+                Loading…
+              </div>
+            </div>
+          </div>
+
+          <!-- INGREDIENTS VIEW -->
+          <div id="view-ingredients" class="view-panel">
+            <div id="ingredientsContent">
+              <div class="loader">
+                <div class="spinner"></div>
+                Loading…
+              </div>
+            </div>
+          </div>
+
+          <!-- ADD FOOD VIEW -->
+          <div class="add-panel view-panel" id="view-add">
+            <div class="form-row">
+              <label>Food Name</label>
+              <input type="text" id="addName" placeholder="e.g. Dinengdeng" />
+            </div>
+            <div class="form-row">
+              <label for="addCategory">Category</label>
+              <select id="addCategory" title="Select a category">
+                <option value="">— select —</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="addOrigin">Origin</label>
+              <select id="addOrigin" title="Select a culinary origin">
+                <option value="">— select —</option>
+                <option value="1">Bacolod</option>
+                <option value="2">Bicol Region</option>
+                <option value="3">Ilocos Region</option>
+                <option value="4">Philippines</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Cooking Instructions</label>
+              <textarea
+                id="addInstructions"
+                placeholder="Step-by-step instructions…"
+              ></textarea>
+            </div>
+            <div class="form-row">
+              <label>Ingredients (pick one or more)</label>
+              <div class="ing-checkbox-grid" id="ingCheckGrid">
+                <div class="loader"><div class="spinner"></div></div>
+              </div>
+            </div>
+            <button class="btn-submit" onclick="submitFood()" id="addBtn">
+              Add to Cookbook
+            </button>
+            <div class="success-msg" id="addSuccess">
+              ✓ Food added successfully! Reload All Foods to see it.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FOOD DETAIL MODAL ── -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+      <div class="modal" id="modalBox">
+        <div class="modal-header">
+          <button class="modal-close" onclick="closeModal()">✕</button>
+          <div class="modal-cat" id="mCat"></div>
+          <div class="modal-name" id="mName"></div>
+          <div class="modal-origin" id="mOrigin"></div>
+        </div>
+        <div class="modal-body">
+          <div class="modal-section-title">Instructions</div>
+          <div class="modal-instructions" id="mInstr"></div>
+          <div class="modal-section-title">Ingredients</div>
+          <div class="modal-ings" id="mIngs"></div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      /* Sign-out button */
+      .sign-out-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: calc(100% - 24px);
+        margin: 0 12px 10px;
+        padding: 9px 14px;
+        background: rgba(255, 122, 89, 0.08);
+        border: 1px solid rgba(255, 122, 89, 0.18);
+        border-radius: 999px;
+        color: #ffb29a;
+        font-family: "Inter", sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          background 180ms,
+          border-color 180ms,
+          color 180ms,
+          transform 180ms;
+      }
+      .sign-out-btn:hover {
+        background: rgba(255, 122, 89, 0.15);
+        border-color: rgba(255, 122, 89, 0.35);
+        color: #ffcfbe;
+        transform: translateX(2px);
+      }
+      .sign-out-btn svg {
+        width: 13px;
+        height: 13px;
+        flex-shrink: 0;
+      }
+
+      /* Token strip expiry indicator */
+      .token-expiry {
+        font-family: "DM Mono", monospace;
+        font-size: 9px;
+        color: #57cc57;
+        margin-top: 4px;
+        letter-spacing: 0.04em;
+      }
+      .token-expiry.expiring {
+        color: var(--banana, #f5c76b);
+      }
+      .token-expiry.expired {
+        color: #ffb29a;
+      }
+    </style>
+
+    <script>
+      // ── Populate sidebar token display & expiry countdown ─────────────────────────
+      (function initSidebar() {
+        const display = sessionStorage.getItem("cookbook_display_token") || "—";
+        const expiry = parseInt(
+          sessionStorage.getItem("cookbook_token_expiry") || "0",
+        );
+        const el = document.getElementById("sidebarToken");
+        if (el) el.textContent = display;
+
+        // Inject expiry row under the token value
+        const strip = document.getElementById("tokenStrip");
+        if (strip) {
+          const expiryEl = document.createElement("div");
+          expiryEl.className = "token-expiry";
+          expiryEl.id = "tokenExpiry";
+          strip.appendChild(expiryEl);
+
+          const tick = () => {
+            const left = expiry - Date.now();
+            if (left <= 0) {
+              expiryEl.textContent = "✕ Token expired";
+              expiryEl.className = "token-expiry expired";
+              return;
+            }
+            const mins = Math.floor(left / 60000);
+            const secs = Math.floor((left % 60000) / 1000);
+            expiryEl.textContent = `⏱ ${mins}:${secs.toString().padStart(2, "0")} remaining`;
+            expiryEl.className =
+              left < 5 * 60 * 1000 ? "token-expiry expiring" : "token-expiry";
+            setTimeout(tick, 1000);
+          };
+          tick();
+        }
+      })();
+
+      function signOut() {
+        sessionStorage.removeItem("cookbook_access_token");
+        sessionStorage.removeItem("cookbook_token_expiry");
+        sessionStorage.removeItem("cookbook_display_token");
+        window.location.replace("/");
+      }
+    </script>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

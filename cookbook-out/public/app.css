@@ -144,7 +144,7 @@ nav { padding: 18px 12px; flex: 1; }
 .nav-btn.active {
   background: linear-gradient(135deg, var(--clay) 0%, var(--clay-dk) 100%);
   color: #fff;
-  box-shadow: 0 10px 22px rgba(94, 234, 212, 0.22);
+  box-shadow: 0 8px 20px rgba(255, 122, 89, 0.28);
 }
 .nav-btn svg { width:15px; height:15px; flex-shrink:0; opacity:.85; }
 
@@ -171,7 +171,7 @@ nav { padding: 18px 12px; flex: 1; }
 /* ── TOPBAR ──────────────────────────────────────────────────────────────── */
 .topbar {
   position: sticky; top: 0; z-index: 10;
-  background: rgba(18, 33, 23, 0.82);
+  background: rgba(15, 25, 40, 0.86);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -454,7 +454,7 @@ select option { background: var(--leaf); }
   font-weight: 600;
   cursor: pointer;
   transition: transform var(--fast), box-shadow var(--fast), filter var(--fast);
-  box-shadow: 0 10px 24px rgba(94, 234, 212, 0.22);
+  box-shadow: 0 10px 24px rgba(255, 122, 89, 0.28);
 }
 .btn-submit:hover {
   transform: translateY(-1px);
